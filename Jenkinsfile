@@ -6,22 +6,28 @@ pipeline {
     IMAGE_TAG = 'latest'
   }
 
+
   stages {
     stage('Checkout') {
       steps {
-        checkout scm
+        checkout([$class: 'GitSCM',
+          branches: [[name: '*/main']],
+          userRemoteConfigs: [[
+            url: 'https://github.com/AlucardTheOne/devopsdemo.git'
+          ]]
+        ])
       }
     }
 
     stage('Validate Config') {
       steps {
-        sh 'docker run --rm -v $PWD/nginx.conf:/etc/nginx/nginx.conf nginx:alpine nginx -t'
+        bat 'docker run --rm -v $PWD/nginx.conf:/etc/nginx/nginx.conf nginx:alpine nginx -t'
       }
     }
 
     stage('Build Image') {
       steps {
-        sh 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
+        bat 'docker build -t $IMAGE_NAME:$IMAGE_TAG .'
       }
     }
 
@@ -31,7 +37,7 @@ pipeline {
       }
       steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-          sh '''
+          bat '''
             echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
             docker push $IMAGE_NAME:$IMAGE_TAG
           '''
