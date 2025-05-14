@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    IMAGE_NAME = 'your-dockerhub-username/my-nginx-image'
+    IMAGE_NAME = 'alucardtheone/my-nginx-image'
     IMAGE_TAG = 'latest'
   }
 
